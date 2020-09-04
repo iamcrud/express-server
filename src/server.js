@@ -3,12 +3,15 @@ const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const { v4: uuid } = require("uuid");
+const createIfNotExist = require("create-if-not-exist");
 const low = require("lowdb");
 const FileAsync = require("lowdb/adapters/FileAsync");
 
 const app = express();
 const port = process.env.PORT || 3000;
 const dbPath = path.join(__dirname, "../db/db.json");
+
+createIfNotExist(dbPath, "");
 const adapter = new FileAsync(dbPath);
 
 app.use(morgan("tiny"));

@@ -2,6 +2,7 @@ const path = require("path");
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const { v4: uuid } = require("uuid");
 const low = require("lowdb");
 const FileAsync = require("lowdb/adapters/FileAsync");
 
@@ -26,18 +27,35 @@ low(adapter).then((db) => {
   });
 
   app.post("/lists", (req, res) => {
-    db.get("lists").push(req.body).write();
-    res.end();
+    const list = {
+      ...req.body,
+      id: uuid(),
+      items: req.body.items.map((item) => ({ ...item, id: uuid() })),
+    };
+
+    db.get("lists").push(list).write();
+    res.json(list);
   });
 
   app.get("/list/:id", (req, res) => {
     const id = req.params.id;
-    const list = db.get("lists").find({ id });
-    res.json(list.value());
+    const list = db.get("lists").find({ id }).value();
+
+    if (!list) {
+      return res.status(404).end();
+    }
+
+    res.json(list);
   });
 
   app.delete("/list/:id", (req, res) => {
     const id = req.params.id;
+    const list = db.get("lists").find({ id }).value();
+
+    if (!list) {
+      return res.status(404).end();
+    }
+
     db.get("lists").remove({ id }).write();
     res.end();
   });
@@ -45,12 +63,38 @@ low(adapter).then((db) => {
   app.put("/list/:id", (req, res) => {
     const id = req.params.id;
     const lists = db.get("lists");
-    lists.splice(lists.findIndex({ id }), 1, req.body).write();
-    res.end();
+    const listId = db.get("lists").findIndex({ id }).value();
+
+    if (listId === -1) {
+      const newList = {
+        ...req.body,
+        id: id,
+        items: req.body.items.map((item) => ({ ...item, id: uuid() })),
+      };
+
+      db.get("lists").push(newList).write();
+      res.json(newList);
+      return;
+    }
+
+    const list = {
+      ...req.body,
+      id: id,
+      items: req.body.items.map((item) => ({ ...item, id: uuid() })),
+    };
+
+    lists.splice(lists.findIndex({ id }), 1, list).write();
+    res.json(list);
   });
 
   app.patch("/list/:id", (req, res) => {
     const id = req.params.id;
+    const list = db.get("lists").find({ id }).value();
+
+    if (!list) {
+      return res.status(404).end();
+    }
+
     db.get("lists").find({ id }).assign(req.body).write();
     res.end();
   });

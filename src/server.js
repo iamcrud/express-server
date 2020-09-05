@@ -45,7 +45,8 @@ low(adapter).then((db) => {
     const list = db.get("lists").find({ id }).value();
 
     if (!list) {
-      return res.status(404).end();
+      res.status(404).end();
+      return;
     }
 
     res.json(list);
@@ -56,7 +57,8 @@ low(adapter).then((db) => {
     const list = db.get("lists").find({ id }).value();
 
     if (!list) {
-      return res.status(404).end();
+      res.status(404).end();
+      return;
     }
 
     db.get("lists").remove({ id }).write();
@@ -68,23 +70,17 @@ low(adapter).then((db) => {
     const lists = db.get("lists");
     const listId = db.get("lists").findIndex({ id }).value();
 
-    if (listId === -1) {
-      const newList = {
-        ...req.body,
-        id: id,
-        items: req.body.items.map((item) => ({ ...item, id: uuid() })),
-      };
-
-      db.get("lists").push(newList).write();
-      res.json(newList);
-      return;
-    }
-
     const list = {
       ...req.body,
       id: id,
       items: req.body.items.map((item) => ({ ...item, id: uuid() })),
     };
+
+    if (listId === -1) {
+      db.get("lists").push(list).write();
+      res.json(list);
+      return;
+    }
 
     lists.splice(lists.findIndex({ id }), 1, list).write();
     res.json(list);
@@ -95,7 +91,8 @@ low(adapter).then((db) => {
     const list = db.get("lists").find({ id }).value();
 
     if (!list) {
-      return res.status(404).end();
+      res.status(404).end();
+      return;
     }
 
     db.get("lists").find({ id }).assign(req.body).write();

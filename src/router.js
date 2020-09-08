@@ -13,10 +13,15 @@ module.exports = function (db) {
   });
 
   lists.post((req, res) => {
+    const { title, items } = req.body;
+
     const list = {
-      ...req.body,
       id: uuid(),
-      items: req.body.items.map((item) => ({ ...item, id: uuid() })),
+      title: title,
+      items: items.map((item) => ({
+        id: uuid(),
+        content: item.content,
+      })),
     };
 
     db.get("lists").push(list).write();
@@ -37,24 +42,27 @@ module.exports = function (db) {
 
   list.put((req, res) => {
     const id = req.params.id;
+    const { title, items } = req.body;
+
     const lists = db.get("lists");
-    const listId = lists.findIndex({ id }).value();
+    const listIndex = lists.findIndex({ id }).value();
 
     const list = {
-      ...req.body,
-      items: req.body.items.map((item) => ({
+      id: id,
+      title: title,
+      items: items.map((item) => ({
         id: item.isNew ? uuid() : item.id,
         content: item.content,
       })),
     };
 
-    if (listId === -1) {
+    if (listIndex === -1) {
       db.get("lists").push(list).write();
       res.json(list);
       return;
     }
 
-    lists.splice(listId, 1, list).write();
+    lists.splice(listIndex, 1, list).write();
     res.json(list);
   });
 

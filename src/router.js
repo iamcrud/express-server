@@ -38,8 +38,15 @@ module.exports = function (db) {
   list.put((req, res) => {
     const id = req.params.id;
     const lists = db.get("lists");
-    const listId = db.get("lists").findIndex({ id }).value();
-    const list = req.body;
+    const listId = lists.findIndex({ id }).value();
+
+    const list = {
+      ...req.body,
+      items: req.body.items.map((item) => ({
+        id: item.isNew ? uuid() : item.id,
+        content: item.content,
+      })),
+    };
 
     if (listId === -1) {
       db.get("lists").push(list).write();
@@ -47,7 +54,7 @@ module.exports = function (db) {
       return;
     }
 
-    lists.splice(lists.findIndex({ id }), 1, list).write();
+    lists.splice(listId, 1, list).write();
     res.json(list);
   });
 

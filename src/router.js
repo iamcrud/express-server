@@ -5,7 +5,7 @@ module.exports = function (db) {
   const router = express.Router();
 
   const lists = router.route("/lists");
-  const list = router.route("/list/:id");
+  const list = router.route("/lists/:id");
 
   lists.get((req, res) => {
     const lists = db.get("lists");

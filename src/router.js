@@ -39,12 +39,7 @@ module.exports = function (db) {
     const id = req.params.id;
     const lists = db.get("lists");
     const listId = db.get("lists").findIndex({ id }).value();
-
-    const list = {
-      ...req.body,
-      id: id,
-      items: req.body.items.map((item) => ({ ...item, id: uuid() })),
-    };
+    const list = req.body;
 
     if (listId === -1) {
       db.get("lists").push(list).write();

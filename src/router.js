@@ -35,19 +35,6 @@ module.exports = function (db) {
     res.json(list);
   });
 
-  list.delete((req, res) => {
-    const id = req.params.id;
-    const list = db.get("lists").find({ id }).value();
-
-    if (!list) {
-      res.status(404).end();
-      return;
-    }
-
-    db.get("lists").remove({ id }).write();
-    res.end();
-  });
-
   list.put((req, res) => {
     const id = req.params.id;
     const lists = db.get("lists");
@@ -69,7 +56,7 @@ module.exports = function (db) {
     res.json(list);
   });
 
-  list.patch((req, res) => {
+  list.delete((req, res) => {
     const id = req.params.id;
     const list = db.get("lists").find({ id }).value();
 
@@ -78,7 +65,7 @@ module.exports = function (db) {
       return;
     }
 
-    db.get("lists").find({ id }).assign(req.body).write();
+    db.get("lists").remove({ id }).write();
     res.end();
   });
 

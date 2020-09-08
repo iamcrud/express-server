@@ -9,7 +9,7 @@ module.exports = function (db) {
 
   lists.get((req, res) => {
     const lists = db.get("lists");
-    res.json(lists.value());
+    res.json(lists.map(({ id, title }) => ({ id, title })).value());
   });
 
   lists.post((req, res) => {

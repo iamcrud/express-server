@@ -1,10 +1,11 @@
 const path = require("path");
 const express = require("express");
-const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const createIfNotExist = require("create-if-not-exist");
 const low = require("lowdb");
 const FileAsync = require("lowdb/adapters/FileAsync");
+
+const logger = require("./logger.js");
 const router = require("./router.js");
 
 const app = express();
@@ -14,7 +15,7 @@ const dbPath = path.join(__dirname, "../db/db.json");
 createIfNotExist(dbPath, "");
 const adapter = new FileAsync(dbPath);
 
-app.use(morgan("tiny"));
+app.use(logger);
 app.use(bodyParser.json());
 
 app.listen(port, () => {
